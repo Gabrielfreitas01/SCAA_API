@@ -1,0 +1,97 @@
+{
+  "meta": {
+    "version": "1.0",
+    "author": "SCAA - config",
+    "updated": "2025-11-20"
+  },
+  "roles": {
+    "admin": {
+      "description": "Acesso total a recursos (apenas em ambiente controlado)",
+      "resources": {
+        "clientes": {
+          "actions": ["read", "write", "delete"],
+          "fields": ["*"]
+        },
+        "financeiro": {
+          "actions": ["read", "write"],
+          "fields": ["*"]
+        }
+      }
+    },
+    "analista": {
+      "description": "Acesso leitura a dados não sensíveis",
+      "resources": {
+        "clientes": {
+          "actions": ["read"],
+          "fields": ["nome", "email", "telefone"]
+        },
+        "financeiro": {
+          "actions": ["read"],
+          "fields": ["mes_ultimo_pagamento"]
+        }
+      }
+    },
+    "operacional": {
+      "description": "Acesso mínimo para operações diárias",
+      "resources": {
+        "clientes": {
+          "actions": ["read"],
+          "fields": ["nome"]
+        }
+      }
+    }
+  },
+  "policies": {
+    "defaultDeny": true,
+    "fieldMasking": {
+      "enabled": true,
+      "strategies": {
+        "cpf": "maskLeft6", 
+        "tipo_sanguineo": "hash" 
+      }
+    }
+  },
+  "behavior": {
+    "global": {
+      "maxRequestsWindow": {
+        "count": 200,
+        "minutes": 60
+      },
+      "sensitiveResourceWindow": {
+        "resource": "clientes",
+        "count": 50,
+        "minutes": 10
+      }
+    },
+    "userThresholds": {
+      "rapidBurst": {
+        "count": 20,
+        "seconds": 30,
+        "action": "alert" 
+      },
+      "exfiltrationSuspect": {
+        "count": 50,
+        "minutes": 10,
+        "action": "block" 
+      }
+    },
+    "fieldAccessRates": {
+      "cpf": {
+        "count": 5,
+        "minutes": 60,
+        "action": "alert"
+      }
+    },
+    "escalation": {
+      "onAlertThenBlockAfter": {
+        "alerts": 2,
+        "timeMinutes": 5
+      }
+    }
+  },
+  "administration": {
+    "configSource": "config/rules.json",
+    "editableBy": ["security_team"],
+    "versioning": true
+  }
+}
