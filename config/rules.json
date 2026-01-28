@@ -1,12 +1,14 @@
 {
   "meta": {
-    "version": "1.0",
+    "version": "2.0",
     "author": "SCAA - config",
-    "updated": "2025-11-20"
+    "updated": "2026-01-27",
+    "lastModifiedBy": "security_team"
   },
   "roles": {
     "admin": {
       "description": "Acesso total a recursos (apenas em ambiente controlado)",
+      "anomalyProfile": "strict",
       "resources": {
         "clientes": {
           "actions": ["read", "write", "delete"],
@@ -20,6 +22,7 @@
     },
     "analista": {
       "description": "Acesso leitura a dados não sensíveis",
+      "anomalyProfile": "moderate",
       "resources": {
         "clientes": {
           "actions": ["read"],
@@ -33,6 +36,7 @@
     },
     "operacional": {
       "description": "Acesso mínimo para operações diárias",
+      "anomalyProfile": "permissive",
       "resources": {
         "clientes": {
           "actions": ["read"],
@@ -46,9 +50,111 @@
     "fieldMasking": {
       "enabled": true,
       "strategies": {
-        "cpf": "maskLeft6", 
-        "tipo_sanguineo": "hash" 
+        "cpf": "maskLeft6",
+        "cnpj": "maskLeft8",
+        "email": "maskDomain",
+        "telefone": "maskLast4",
+        "tipo_sanguineo": "hash"
       }
+    }
+  },
+  "anomalyProfiles": {
+    "strict": {
+      "description": "Perfil para admins - anomalias detectam logo",
+      "timeWindow": 60000,
+      "maxRequestsPerWindow": 50,
+      "maxBytesPerWindow": 5242880,
+      "maxResourcesPerWindow": 3,
+      "rapidRequestThreshold": 200,
+      "dataExfiltractionThreshold": 2097152
+    },
+    "moderate": {
+      "description": "Perfil para analistas - balanço entre segurança e usabilidade",
+      "timeWindow": 60000,
+      "maxRequestsPerWindow": 100,
+      "maxBytesPerWindow": 10485760,
+      "maxResourcesPerWindow": 5,
+      "rapidRequestThreshold": 100,
+      "dataExfiltractionThreshold": 5242880
+    },
+    "permissive": {
+      "description": "Perfil para operacional - menos restritivo",
+      "timeWindow": 60000,
+      "maxRequestsPerWindow": 200,
+      "maxBytesPerWindow": 20971520,
+      "maxResourcesPerWindow": 10,
+      "rapidRequestThreshold": 50,
+      "dataExfiltractionThreshold": 10485760
+    }
+  },
+  "detectionRules": {
+    "excessive_requests": {
+      "enabled": true,
+      "severity": "high",
+      "description": "Detecta quando usuário excede limite de requisições na janela de tempo",
+      "action": "throttle"
+    },
+    "data_exfiltration": {
+      "enabled": true,
+      "severity": "critical",
+      "description": "Detecta tentativa de extrair volume anormal de dados",
+      "action": "block"
+    },
+    "rapid_requests": {
+      "enabled": true,
+      "severity": "high",
+      "description": "Detecta requisições em sequência muito rápida (< 100ms)",
+      "action": "block"
+    },
+    "scattered_access": {
+      "enabled": true,
+      "severity": "medium",
+      "description": "Detecta acesso a muitos recursos diferentes em pouco tempo",
+      "action": "alert"
+    },
+    "behavior_change": {
+      "enabled": true,
+      "severity": "medium",
+      "description": "Detecta mudança significativa no padrão de acesso do usuário",
+      "action": "alert"
+    },
+    "sensitive_field_access": {
+      "enabled": true,
+      "severity": "high",
+      "description": "Detecta acesso frequente a campos sensíveis (CPF, CNP, etc)",
+      "fields": ["cpf", "cnpj", "senha", "token"],
+      "threshold": 5,
+      "timeWindow": 600000,
+      "action": "alert"
+    },
+    "failed_auth_attempts": {
+      "enabled": true,
+      "severity": "medium",
+      "description": "Detecta múltiplas tentativas de autenticação falhadas",
+      "threshold": 5,
+      "timeWindow": 300000,
+      "action": "block"
+    },
+    "deleted_resource_access": {
+      "enabled": true,
+      "severity": "high",
+      "description": "Detecta tentativa de acesso a recurso que foi deletado",
+      "action": "block"
+    }
+  },
+  "escalationPolicies": {
+    "alert_to_block": {
+      "description": "Escala de ALERT para BLOCK após múltiplos alertas",
+      "alertThreshold": 3,
+      "timeWindow": 300000,
+      "action": "block"
+    },
+    "block_to_lockout": {
+      "description": "Escala de BLOCK para lockout da conta",
+      "blockThreshold": 5,
+      "timeWindow": 600000,
+      "action": "lockout",
+      "requiresManualReview": true
     }
   },
   "behavior": {
@@ -67,16 +173,21 @@
       "rapidBurst": {
         "count": 20,
         "seconds": 30,
-        "action": "alert" 
+        "action": "alert"
       },
       "exfiltrationSuspect": {
         "count": 50,
         "minutes": 10,
-        "action": "block" 
+        "action": "block"
       }
     },
     "fieldAccessRates": {
       "cpf": {
+        "count": 5,
+        "minutes": 60,
+        "action": "alert"
+      },
+      "cnpj": {
         "count": 5,
         "minutes": 60,
         "action": "alert"
@@ -92,6 +203,8 @@
   "administration": {
     "configSource": "config/rules.json",
     "editableBy": ["security_team"],
-    "versioning": true
+    "versioning": true,
+    "requiresApprovalForChanges": true,
+    "auditAllChanges": true
   }
 }
