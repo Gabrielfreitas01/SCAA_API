@@ -26,10 +26,28 @@ Banco de Dados: Simulação via MongoDB ou arquivos JSON para foco na lógica de
 
 4.Requisitos de Segurança
 O projeto atende a diversos requisitos não funcionais (RNF) e funcionais (RF):
-RNF-01: Validação rigorosa de assinaturas de tokens JWT.
-RNF-06: Retenção e integridade dos logs de auditoria por períodos definidos para fins legais.
-RF-02: Aplicação de restrição de campos baseada no perfil do usuário.
-RF-04: Monitoramento de volume de dados para detecção de comportamento anômalo.
+RNF-01:
+O SCAA deve validar rigorosamente a assinatura dos tokens JWT recebidos em todas as requisições de API para garantir a autenticidade e integridade da sessão.
+RNF-02:
+Todos os dados confidenciais (em trânsito) entre o SCAA e a API de backend devem ser criptografados usando TLS/SSL (HTTPS).
+RNF-03:
+O sistema deve registrar logs detalhados de todas as requisições de acesso a dados sensíveis (bem-sucedidas e falhas) no gateway SCAA.
+RNF-04:
+O SCAA deve ser submetido a um teste de Penetração (PenTest) simulando um ataque de Broken Access Control para verificar a efetividade da autorização.
+RNF-05:
+O SCAA deve operar em modo de "fail-safe" ou com replicação básica para garantir a Disponibilidade contínua das APIs, mesmo se uma instância do gateway falhar (ISO 27001 - A.17.2).
+RNF-06:
+Os logs de auditoria (RNF-03) devem ser protegidos contra modificação (Integridade) e armazenados por um período definido (ex: 1 ano) para cumprir requisitos de accountability da LGPD e ISO 27001 (A.12.4).
+RNF-07:
+Dados pessoais sensíveis (ex: CPF, dados de saúde) não devem ser registrados em logs de texto puro (plain text). O SCAA deve aplicar mascaramento ou anonimização nos logs (RNF-03) para aderir à Minimização de Dados (LGPD).
+
+RF-01: O sistema deve validar e impor o acesso à API baseado em tokens de autenticação válidos (JWT).
+RF-02: O sistema deve aplicar o Princípio do Menor Privilégio na API, restringindo os campos de dados que cada usuário pode visualizar.
+RF-03: O sistema deve registrar todos os detalhes da requisição de acesso a dados (quem, o quê, quando) em um log de auditoria.
+RF-04: O sistema deve alertar a equipe de segurança quando um usuário interno exceder um limite de volume de dados consultados na API (detecção de anomalia).
+RF-05: O sistema deve prover uma interface (ou arquivo de configuração seguro) para que a Equipe de Segurança possa gerenciar as regras de acesso (RF-02) e os escopos de dados permitidos por usuário/grupo (ISO 27001 - A.9.4 Gerenciamento de Acesso).
+RF-06: O sistema deve permitir que a Equipe de Segurança configure os limiares de detecção de anomalia (RF-04), como "N" requisições em "X" minutos, para balancear a detecção e evitar falsos positivos.
+
 
 5.Conformidade e Normas
 O SCAA foi projetado com foco em:
