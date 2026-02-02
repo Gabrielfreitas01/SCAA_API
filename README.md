@@ -25,7 +25,7 @@ Comunicação: Criptografia TLS/SSL (HTTPS).
 Banco de Dados: Simulação via MongoDB ou arquivos JSON para foco na lógica de segurança.
 
 4.Requisitos de Segurança
-O projeto atende a diversos requisitos não funcionais (RNF) e funcionais (RF) mapeados na documentação:
+O projeto atende a diversos requisitos não funcionais (RNF) e funcionais (RF):
 RNF-01: Validação rigorosa de assinaturas de tokens JWT.
 RNF-06: Retenção e integridade dos logs de auditoria por períodos definidos para fins legais.
 RF-02: Aplicação de restrição de campos baseada no perfil do usuário.
