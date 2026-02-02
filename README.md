@@ -22,7 +22,7 @@ Mascaramento de Dados nos Logs: Aplicação de anonimização para garantir que 
 Linguagem: JavaScript.
 Ambiente de Execução: Node.js.
 Comunicação: Criptografia TLS/SSL (HTTPS).
-Banco de Dados: Simulação via MongoDB ou arquivos JSON para foco na lógica de segurança.
+Banco de Dados: Simulação via MongoDB.
 
 4.Requisitos de Segurança
 O projeto atende a diversos requisitos não funcionais (RNF) e funcionais (RF):
