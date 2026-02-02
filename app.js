@@ -22,7 +22,7 @@ app.get('/', (req, res) => res.json({
 
 const PORT = process.env.PORT || 3000;
 app.listen(PORT, () => {
-  console.log(`\n🚀 SCAA rodando na porta ${PORT}`);
+  console.log(`\n SCAA rodando na porta ${PORT}`);
   console.log(`📊 Dashboard: http://localhost:${PORT}/admin/dashboard`);
   console.log(`🔍 Health Check: http://localhost:${PORT}/admin/health\n`);
 });
